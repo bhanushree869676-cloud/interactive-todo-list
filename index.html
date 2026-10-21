@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My To-Do List</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 450px;
+    margin: 50px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px #3333;
+}
+
+h1 {
+    text-align: center;
+    color: #5145a5;
+}
+
+.input-area {
+    display: flex;
+    gap: 8px;
+}
+
+input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.add-btn {
+    background: #5145a5;
+    color: white;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f3f3ff;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 7px;
+}
+
+.task-text {
+    flex: 1;
+    overflow-wrap: anywhere;
+}
+
+.completed .task-text {
+    text-decoration: line-through;
+    color: gray;
+}
+
+.delete-btn {
+    background: #ff5252;
+    color: white;
+}
+
+#message {
+    text-align: center;
+    color: #666;
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>📝 My To-Do List</h1>
+
+    <div class="input-area">
+        <input type="text" id="taskInput"
+               placeholder="Enter a new task">
+        <button class="add-btn" onclick="addTask()">Add</button>
+    </div>
+
+    <ul id="taskList"></ul>
+    <p id="message"></p>
+</div>
+
+<script>
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function displayTasks() {
+    const list = document.getElementById("taskList");
+    const message = document.getElementById("message");
+
+    list.innerHTML = "";
+
+    if (tasks.length === 0) {
+        message.textContent = "No tasks yet. Add your first task!";
+        return;
+    }
+
+    message.textContent = "";
+
+    tasks.forEach((task, index) => {
+        const li = document.createElement("li");
+
+        if (task.completed) {
+            li.classList.add("completed");
+        }
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = task.completed;
+        checkbox.style.flex = "0 0 auto";
+
+        checkbox.addEventListener("change", () => {
+            tasks[index].completed = checkbox.checked;
+            saveTasks();
+            displayTasks();
+        });
+
+        const text = document.createElement("span");
+        text.className = "task-text";
+        text.textContent = task.text;
+
+        const del = document.createElement("button");
+        del.className = "delete-btn";
+        del.textContent = "Delete";
+
+        del.addEventListener("click", () => {
+            tasks.splice(index, 1);
+            saveTasks();
+            displayTasks();
+        });
+
+        li.append(checkbox, text, del);
+        list.appendChild(li);
+    });
+}
+
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const text = input.value.trim();
+
+    if (text === "") {
+        alert("Please enter a task!");
+        return;
+    }
+
+    tasks.push({
+        text: text,
+        completed: false
+    });
+
+    saveTasks();
+    input.value = "";
+    displayTasks();
+    input.focus();
+}
+
+document.getElementById("taskInput")
+    .addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            addTask();
+        }
+    });
+
+displayTasks();
+</script>
+
+</body>
+</html>
